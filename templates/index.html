@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FaceID • Recognition Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar"><div class="brand"><div class="brand-icon">F</div><div><b>FaceID</b><small>RECOGNITION SYSTEM</small></div></div><div class="nav-label">WORKSPACE</div><a class="nav active" href="/"><span>▦</span> Overview</a><a class="nav" href="/#live"><span>◉</span> Live recognition</a><a class="nav" href="/image_recognition"><span>▧</span> Image recognition</a><a class="nav" href="/persons"><span>♙</span> Registered persons</a><a class="nav" href="/history"><span>◷</span> Recognition history</a><a class="nav" href="/analytics"><span>▥</span> Analytics</a><a class="nav" href="/evaluation"><span>◫</span> Model evaluation</a> <a class="nav" href="/lfw-evaluation">
+    <span>◫</span> LFW Evaluation
+</a>
+<a class="nav" href="/lfw-demo">
+    <span>▣</span> Research Demo
+</a>  <a class="nav" href="/model-comparison">
+    <span>▥</span> Model Comparison
+</a><a class="nav" href="/system-management"><span>⚙</span> System Management</a><div class="side-note"><div class="pulse"></div><div><b>Local processing</b><small>All recognition tools are available from this menu.</small></div></div><div class="side-bottom">FACE RECOGNITION<br><span>Local dashboard · v5.0</span></div></aside>
+  <main class="main">
+    <header class="topbar"><div><div class="eyebrow">WORKSPACE / OVERVIEW</div><h1>Recognition dashboard</h1><p>Monitor your live face identification system.</p></div><div class="top-pill"><i></i> LOCAL SYSTEM</div></header>
+    <section class="stats">
+      <article class="stat"><div class="stat-head">SYSTEM STATUS <span>●</span></div><strong id="systemState">Offline</strong><small id="systemHint">Camera is stopped</small></article>
+      <article class="stat"><div class="stat-head">REGISTERED IDENTITIES <span>◈</span></div><strong id="identityCount">—</strong><small>Unique labels in your dataset</small></article>
+      <article class="stat"><div class="stat-head">FACES IN CURRENT FRAME <span>◎</span></div><strong id="faceCount">0</strong><small>Updated live while camera runs</small></article>
+    </section>
+    <section class="content-grid" id="live">
+      <article class="panel camera-panel">
+        <div class="panel-head"><div><div class="eyebrow">LIVE MONITOR</div><h2>Camera feed</h2></div><div class="live-tag" id="liveTag"><i></i> OFFLINE</div></div>
+        <div class="camera-view"><img id="videoFeed" alt="Live webcam feed"><div class="placeholder" id="placeholder"><div class="camera-icon">◉</div><b>Camera is not active</b><span>Start recognition to display your webcam feed here.</span></div><div class="camera-overlay">CAM 01 <span>LOCAL FEED</span></div></div>
+        <div class="camera-controls"><div><b id="recognitionText">Waiting to start</b><small id="updatedAt">No live frame yet</small></div><div class="buttons"><button class="btn stop" id="stopBtn" disabled>Stop camera</button><button class="btn primary" id="startBtn">Start recognition <span>→</span></button></div></div>
+      </article>
+      <article class="panel result-panel">
+        <div class="eyebrow">IDENTIFICATION</div><h2>Latest result</h2>
+        <div class="result-icon">⌕</div><div class="result-name" id="latestName">Waiting</div><p id="resultDescription">The latest detected identity will appear here.</p>
+        <div class="result-divider"></div><div class="result-row"><span>Faces detected</span><b id="resultFaces">0</b></div><div class="result-row"><span>Last frame</span><b id="resultTime">—</b></div>
+        <div class="privacy"><span>盾</span><div><b>Privacy-first processing</b><small>Recognition runs locally using your existing Python model.</small></div></div>
+      </article>
+    </section>
+    <footer>FaceID Dashboard <span>Built on your existing Python recognition pipeline</span></footer>
+  </main>
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body></html>

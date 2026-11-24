@@ -1,0 +1,437 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FaceID • Model Comparison</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<style>
+.comparison-section {
+    margin-bottom: 20px;
+}
+
+.comparison-section h2 {
+    margin-bottom: 18px;
+}
+
+.table-scroll {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+.comparison-table th {
+    color: #9aa9c0;
+    background: #17243b;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 15px 16px;
+    text-align: center;
+    border-bottom: 1px solid #24314a;
+}
+
+.comparison-table td {
+    color: #eef3ff;
+    font-size: 12px;
+}
+
+.comparison-table td:first-child {
+    text-align: left;
+    color: #b9c7dc;
+    font-weight: 600;
+}
+
+.comparison-table tr:last-child td {
+    border-bottom: none;
+}
+
+.best-result {
+    color: #3bd6a0 !important;
+    font-weight: 700;
+}
+
+.method-note {
+    margin-top: 16px;
+    padding: 15px;
+    background: #17243b;
+    border: 1px solid #2b3a55;
+    border-radius: 9px;
+    color: #aebbd0;
+    font-size: 11px;
+    line-height: 1.8;
+}
+
+.method-note strong {
+    color: #eef3ff;
+}
+
+.observation-list {
+    padding-left: 20px;
+    color: #b9c7dc;
+    font-size: 12px;
+    line-height: 2.2;
+}
+
+.section-spacing {
+    margin-top: 18px;
+}
+
+@media(max-width:650px) {
+    .comparison-table th,
+    .comparison-table td {
+        padding: 12px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="shell">
+
+<aside class="sidebar">
+    <div class="brand">
+        <div class="brand-icon">F</div>
+        <div><b>FaceID</b><small>RECOGNITION SYSTEM</small></div>
+    </div>
+
+    <div class="nav-label">WORKSPACE</div>
+
+    <a class="nav" href="/"><span>▦</span> Overview</a>
+    <a class="nav" href="/#live"><span>◉</span> Live recognition</a>
+    <a class="nav" href="/image_recognition"><span>▧</span> Image recognition</a>
+    <a class="nav" href="/persons"><span>♙</span> Registered persons</a>
+    <a class="nav" href="/history"><span>◷</span> Recognition history</a>
+    <a class="nav" href="/analytics"><span>▥</span> Analytics</a>
+    <a class="nav" href="/evaluation"><span>◫</span> Model evaluation</a>
+    <a class="nav" href="/lfw-evaluation"><span>◫</span> LFW Evaluation</a>
+    <a class="nav" href="/lfw-demo"><span>▣</span> Research Demo</a>
+    <a class="nav active" href="/model-comparison"><span>▥</span> Model Comparison</a>
+    <a class="nav" href="/system-management"><span>⚙</span> System Management</a>
+
+    <div class="side-note">
+        <div class="pulse"></div>
+        <div>
+            <b>Local processing</b>
+            <small>All recognition tools are available from this menu.</small>
+        </div>
+    </div>
+
+    <div class="side-bottom">
+        FACE RECOGNITION<br>
+        <span>Local dashboard · v5.0</span>
+    </div>
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+    <div>
+        <div class="eyebrow">RESEARCH / MODEL COMPARISON</div>
+        <h1>Model comparison</h1>
+        <p>Comparative analysis of three face recognition models.</p>
+    </div>
+    <div class="top-pill"><i></i> RESEARCH RESULTS</div>
+</header>
+
+<section class="stats">
+    <article class="stat">
+        <div class="stat-head">MODELS TESTED <span>◈</span></div>
+        <strong>03</strong>
+        <small>dlib, FaceNet and ArcFace</small>
+    </article>
+
+    <article class="stat">
+        <div class="stat-head">HELD-OUT IMAGES <span>▧</span></div>
+        <strong>5,904</strong>
+        <small>Final evaluation subset</small>
+    </article>
+
+    <article class="stat">
+        <div class="stat-head">CALIBRATION IMAGES <span>◎</span></div>
+        <strong>4,870</strong>
+        <small>Separate threshold selection subset</small>
+    </article>
+</section>
+
+<section class="panel comparison-section">
+    <div class="panel-head">
+        <div>
+            <div class="eyebrow">01 / ACCURACY</div>
+            <h2>Identification performance</h2>
+        </div>
+    </div>
+
+    <div class="table-scroll">
+    <table class="comparison-table">
+        <thead>
+        <tr>
+            <th>Metric</th>
+            <th>dlib</th>
+            <th>FaceNet</th>
+            <th>ArcFace</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Correct known identification</td>
+            <td>82.55%</td>
+            <td>84.93%</td>
+            <td class="best-result">96.04%</td>
+        </tr>
+        <tr>
+            <td>Wrong known identification</td>
+            <td>1.88%</td>
+            <td>1.17%</td>
+            <td class="best-result">0.79%</td>
+        </tr>
+        <tr>
+            <td>Known identity rejection</td>
+            <td>15.57%</td>
+            <td>13.90%</td>
+            <td class="best-result">3.18%</td>
+        </tr>
+        <tr>
+            <td>Unknown identity rejection</td>
+            <td>88.62%</td>
+            <td>89.23%</td>
+            <td class="best-result">98.98%</td>
+        </tr>
+        <tr>
+            <td>False acceptance rate</td>
+            <td>11.38%</td>
+            <td>10.77%</td>
+            <td class="best-result">1.02%</td>
+        </tr>
+        <tr>
+            <td>Embedding coverage</td>
+            <td>100%</td>
+            <td>100%</td>
+            <td>99.92%</td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div class="method-note">
+        Final metrics are calculated using the held-out test subset.
+        Thresholds were selected separately using the calibration subset.
+    </div>
+</section>
+
+<section class="panel comparison-section">
+    <div class="panel-head">
+        <div>
+            <div class="eyebrow">02 / SPEED</div>
+            <h2>Processing performance</h2>
+        </div>
+    </div>
+
+    <div class="table-scroll">
+    <table class="comparison-table">
+        <thead>
+        <tr>
+            <th>Model</th>
+            <th>Average time / image</th>
+            <th>Median time / image</th>
+            <th>Throughput</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>dlib</td>
+            <td>0.4863 sec</td>
+            <td>0.4173 sec</td>
+            <td>2.06 images/sec</td>
+        </tr>
+        <tr>
+            <td>FaceNet</td>
+            <td class="best-result">0.1304 sec</td>
+            <td class="best-result">0.1240 sec</td>
+            <td class="best-result">7.67 images/sec</td>
+        </tr>
+        <tr>
+            <td>ArcFace</td>
+            <td>0.6731 sec</td>
+            <td>0.6060 sec</td>
+            <td>1.49 images/sec</td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div class="method-note">
+        Measurements use 200 images per run, three independent runs
+        per model and three warm-up images per run. Timing includes
+        image reading, detection, embedding generation and gallery matching.
+    </div>
+</section>
+
+<section class="panel comparison-section">
+    <div class="panel-head">
+        <div>
+            <div class="eyebrow">03 / CONFIGURATION</div>
+            <h2>Calibrated recognition thresholds</h2>
+        </div>
+    </div>
+
+    <div class="table-scroll">
+    <table class="comparison-table">
+        <thead>
+        <tr>
+            <th>Model</th>
+            <th>Distance metric</th>
+            <th>Threshold</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr><td>dlib</td><td>Euclidean distance</td><td>0.504852</td></tr>
+        <tr><td>FaceNet</td><td>Cosine distance</td><td>0.355354</td></tr>
+        <tr><td>ArcFace</td><td>Cosine distance</td><td>0.638913</td></tr>
+        </tbody>
+    </table>
+    </div>
+</section>
+
+<section class="panel comparison-section">
+    <div class="panel-head">
+        <div>
+            <div class="eyebrow">04 / MODEL SIZE</div>
+            <h2>Recognition model weights</h2>
+        </div>
+    </div>
+
+    <div class="table-scroll">
+    <table class="comparison-table">
+        <thead>
+        <tr><th>Model component</th><th>Size</th></tr>
+        </thead>
+        <tbody>
+        <tr><td>dlib recognition weights</td><td>21.43 MB</td></tr>
+        <tr><td>FaceNet weights</td><td>106.71 MB</td></tr>
+        <tr><td>ArcFace recognition model</td><td>166.31 MB</td></tr>
+        <tr><td>ArcFace buffalo_l bundle</td><td>325.46 MB</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div class="method-note">
+        ArcFace recognition model size and complete buffalo_l bundle
+        size are separate measurements.
+    </div>
+</section>
+
+<section class="panel comparison-section">
+    <div class="panel-head">
+        <div>
+            <div class="eyebrow">05 / ENVIRONMENT</div>
+            <h2>Experimental environment</h2>
+        </div>
+    </div>
+
+    <section class="stats">
+        <article class="stat">
+            <div class="stat-head">OPERATING SYSTEM</div>
+            <strong>Windows 10</strong>
+        </article>
+        <article class="stat">
+            <div class="stat-head">PYTHON VERSION</div>
+            <strong>3.10.11</strong>
+        </article>
+        <article class="stat">
+            <div class="stat-head">RAM</div>
+            <strong>8 GB</strong>
+        </article>
+    </section>
+
+    <section class="stats">
+        <article class="stat">
+            <div class="stat-head">LOGICAL PROCESSORS</div>
+            <strong>4</strong>
+        </article>
+        <article class="stat">
+            <div class="stat-head">DEVICE</div>
+            <strong>CPU</strong>
+        </article>
+        <article class="stat">
+            <div class="stat-head">SPEED TEST RUNS</div>
+            <strong>3 / model</strong>
+        </article>
+    </section>
+
+    <div class="method-note">
+        dlib and modern models used separate Python environments.
+        All speed tests were performed on CPU.
+    </div>
+</section>
+
+<section class="panel comparison-section">
+    <div class="panel-head">
+        <div>
+            <div class="eyebrow">06 / FINDINGS</div>
+            <h2>Experimental observations</h2>
+        </div>
+    </div>
+
+    <ul class="observation-list">
+        <li>ArcFace achieved the highest correct known identification rate.</li>
+        <li>ArcFace achieved the highest unknown identity rejection rate.</li>
+        <li>FaceNet recorded the lowest average processing time per image.</li>
+        <li>dlib had the smallest recognition model weight file.</li>
+        <li>ArcFace had the highest measured processing time in this CPU experiment.</li>
+    </ul>
+</section>
+
+<section class="panel comparison-section">
+    <div class="panel-head">
+        <div>
+            <div class="eyebrow">07 / RESEARCH NOTES</div>
+            <h2>Methodology and limitations</h2>
+        </div>
+    </div>
+
+    <div class="method-note">
+        <strong>Dataset protocol:</strong><br>
+        LFW was originally designed for face verification. This experiment
+        uses a custom open-set identification protocol with a gallery of
+        enrolled identities and separate query images.
+
+        <br><br>
+
+        <strong>Evaluation:</strong><br>
+        Thresholds were independently selected on a calibration subset
+        of 4,870 images. Final comparison metrics use the held-out subset
+        of 5,904 images.
+
+        <br><br>
+
+        <strong>Limitations:</strong><br>
+        These results are not official LFW verification benchmark scores.
+        Processing times represent the tested software pipelines rather
+        than isolated neural-network inference. This experiment does not
+        establish suitability for real-world law-enforcement identification.
+    </div>
+</section>
+
+<footer>
+    FaceID Dashboard
+    <span>Built on your existing Python recognition pipeline</span>
+</footer>
+
+</main>
+</div>
+</body>
+</html>
+

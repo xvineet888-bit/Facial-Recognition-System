@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>System Management • FaceID</title>
+<link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}">
+<style>
+.wrap{max-width:1200px}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:22px}
+.metric{background:#111a2d;border:1px solid #24314a;border-radius:13px;padding:18px}
+.metric span{font-size:10px;color:#9aa9c0;letter-spacing:1px}
+.metric strong{display:block;font-size:25px;margin-top:8px}
+.management-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.management-card{background:#111a2d;border:1px solid #24314a;border-radius:14px;overflow:hidden;min-width:0}
+.management-card[open]{grid-column:1/-1}
+.management-card summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:15px;padding:19px;min-height:94px;user-select:none}
+.management-card summary::-webkit-details-marker{display:none}
+.management-card summary:hover{background:#17233a}
+.management-icon{width:48px;height:48px;flex:0 0 48px;border-radius:12px;background:#202f50;color:#aebfff;display:grid;place-items:center;font-size:23px}
+.management-title{font-size:15px;font-weight:700;color:#eef3ff}
+.management-subtitle{font-size:12px;color:#9aa9c0;margin-top:5px;line-height:1.45}
+.management-chevron{margin-left:auto;color:#94a3b8;font-size:18px;transition:transform .2s}
+.management-card[open] .management-chevron{transform:rotate(180deg)}
+.card-content{border-top:1px solid #26344b;padding:20px}
+.hint{font-size:12px;color:#9aa9c0;line-height:1.7}
+.action{display:inline-block;padding:10px 14px;border:0;border-radius:8px;background:#617cff;color:white;text-decoration:none;font-weight:700;cursor:pointer}
+.action:disabled{opacity:.45;cursor:not-allowed}
+.danger{background:#9e4053}
+.error{background:#301b25;border:1px solid #75404d;color:#ffb7c1;padding:12px;border-radius:8px;margin-bottom:12px}
+.success{background:#153329;border:1px solid #28664c;color:#b6f2d1;padding:12px;border-radius:8px;margin-bottom:12px}
+input[type=file]{display:block;margin:12px 0;color:#b9c7dc;max-width:100%}
+.tablebox{overflow:auto;margin-top:14px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #26344b;text-align:left;font-size:12px}
+th{color:#9aa9c0}
+@media(max-width:800px){.management-grid{grid-template-columns:1fr}.management-card[open]{grid-column:auto}}
+@media(max-width:600px){.metrics{grid-template-columns:1fr}.management-card summary{padding:15px}.card-content{padding:15px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<div class="brand"><div class="brand-icon">F</div><div><b>FaceID</b><small>RECOGNITION SYSTEM</small></div></div>
+<div class="nav-label">WORKSPACE</div>
+<a class="nav" href="/"><span>▦</span> Overview</a>
+<a class="nav" href="/#live"><span>◉</span> Live recognition</a>
+<a class="nav" href="/image_recognition"><span>▧</span> Image recognition</a>
+<a class="nav" href="/persons"><span>♙</span> Registered persons</a>
+<a class="nav" href="/history"><span>◷</span> Recognition history</a>
+<a class="nav" href="/analytics"><span>▥</span> Analytics</a>
+<a class="nav" href="/lfw-evaluation">
+    <span>◫</span> LFW Evaluation
+</a>
+<a class="nav" href="/lfw-demo">
+    <span>▣</span> Research Demo
+</a>
+<a class="nav" href="/evaluation"><span>◫</span> Model evaluation</a>
+<a class="nav active" href="/system-management"><span>⚙</span> System Management</a>
+<div class="side-note"><div class="pulse"></div><div><b>Local processing</b><small>All recognition tools are available from this menu.</small></div></div>
+<div class="side-bottom">FACE RECOGNITION<br><span>Local dashboard · v5.0</span></div>
+</aside>
+<main class="main wrap">
+<header class="topbar"><div><div class="eyebrow">WORKSPACE / DATA</div><h1>System Management</h1><p>Choose a section to manage your FaceID data.</p></div><div class="top-pill"><i></i> SHARED WORKSPACE</div></header>
+{% with messages=get_flashed_messages(with_categories=true) %}{% for category,message in messages %}<div class="{{ 'error' if category == 'error' else 'success' }}">{{ message }}</div>{% endfor %}{% endwith %}
+<section class="metrics">
+<div class="metric"><span>REGISTERED IDENTITIES</span><strong>{{ people|length }}</strong></div>
+<div class="metric"><span>REGISTERED PHOTOS</span><strong>{{ total_photos }}</strong></div>
+<div class="metric"><span>RECOGNITION EVENTS</span><strong>{{ events_count }}</strong></div>
+</section>
+
+<section class="management-grid" aria-label="System management sections">
+<details class="management-card">
+<summary><span class="management-icon" aria-hidden="true">↕</span><span><span class="management-title">Backup &amp; Restore</span><span class="management-subtitle">Download a full backup or restore saved data</span></span><span class="management-chevron">⌄</span></summary>
+<div class="card-content">
+<p class="hint">A full backup includes the SQLite recognition history database, registered face photos and processed face encodings. Stop the webcam before creating or restoring a backup. Store the ZIP somewhere private because it contains biometric data.</p>
+<form method="post" action="{{ url_for('create_backup') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="action" type="submit" {% if camera_running %}disabled title="Stop webcam first"{% endif %}>Download full backup</button></form>
+<hr style="border-color:#26344b;margin:20px 0">
+<h3>Restore from backup</h3>
+<p class="hint">Restore replaces the current history database, registered photos and encodings. Make a fresh backup of the current data first. The restore is disabled while the webcam is running.</p>
+<form method="post" enctype="multipart/form-data" action="{{ url_for('restore_backup') }}" onsubmit="return confirm('Restore this backup? Current history, registered photos and encodings will be replaced.');">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="file" name="backup_file" accept=".zip,application/zip" required>
+<button class="action danger" type="submit" {% if camera_running %}disabled title="Stop webcam first"{% endif %}>Restore backup</button>
+</form>
+</div>
+</details>
+
+<details class="management-card">
+<summary><span class="management-icon" aria-hidden="true">⌫</span><span><span class="management-title">Clear Recognition History</span><span class="management-subtitle">Remove events for a selected date or clear all history</span></span><span class="management-chevron">⌄</span></summary>
+<div class="card-content">
+<p class="hint">Choose a date to delete only the recognition events recorded on that day. Registered people, their photos, face encodings and System Management activity records will remain unchanged. Stop the webcam before deleting history.</p>
+<form method="post" action="{{ url_for('clear_recognition_history_date') }}" onsubmit="return confirm('Permanently delete recognition history from the selected date only? Registered photos and face encodings will remain unchanged.');" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<div><label for="history-date" class="hint" style="display:block;margin-bottom:6px">Select date</label><input type="date" id="history-date" name="selected_date" required style="padding:10px;border:1px solid #34445f;border-radius:8px;background:#0b1020;color:#eef3ff"></div>
+<button class="action danger" type="submit" {% if camera_running %}disabled title="Stop webcam first"{% endif %}>Delete selected date</button>
+</form>
+<hr style="border-color:#26344b;margin:20px 0">
+<p class="hint">To remove every recognition event regardless of date, use the separate option below. This cannot be undone unless you have a backup.</p>
+<form method="post" action="{{ url_for('clear_recognition_history') }}" onsubmit="return confirm('Permanently delete ALL recognition history events? This cannot be undone unless you have a backup.');">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="action danger" type="submit" {% if camera_running %}disabled title="Stop webcam first"{% endif %}>Clear all recognition history</button>
+</form>
+</div>
+</details>
+
+<details class="management-card">
+<summary><span class="management-icon" aria-hidden="true">▤</span><span><span class="management-title">Registered Data Overview</span><span class="management-subtitle">View storage size and registered people</span></span><span class="management-chevron">⌄</span></summary>
+<div class="card-content">
+<p class="hint">Current data folder size: {{ '%.2f'|format(data_size / 1048576) }} MB. Add photos or remove registered people from the existing Registered Persons page.</p>
+<p><a class="action" href="{{ url_for('persons') }}">Open Registered Persons</a></p>
+<div class="tablebox"><table><thead><tr><th>PERSON</th><th>PHOTOS</th></tr></thead><tbody>{% for person in people %}<tr><td>{{ person.name }}</td><td>{{ person.photos }}</td></tr>{% else %}<tr><td colspan="2">No registered identities found.</td></tr>{% endfor %}</tbody></table></div>
+</div>
+</details>
+
+<details class="management-card">
+<summary><span class="management-icon" aria-hidden="true">◷</span><span><span class="management-title">Recent System Activity</span><span class="management-subtitle">Keep useful records and permanently delete individual entries you no longer need</span></span><span class="management-chevron">⌄</span></summary>
+<div class="card-content">
+<p class="hint">These entries record backup and restore actions. Delete only the entries you no longer want to keep. Deleting an entry does not create another activity record. Because this is a shared no-login workspace, the system does not identify which team member performed an action.</p>
+<div class="tablebox"><table><thead><tr><th>TIME</th><th>ACTION</th><th>DETAILS</th><th>MANAGE</th></tr></thead><tbody>{% for item in activities %}<tr><td>{{ item[3] }}</td><td>{{ item[1] }}</td><td>{{ item[2] }}</td><td><form method="post" action="{{ url_for('delete_system_activity', activity_id=item[0]) }}" onsubmit="return confirm('Permanently delete this activity record? This cannot be undone.');" style="margin:0"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="action danger" type="submit" style="padding:7px 10px;font-size:11px">Delete</button></form></td></tr>{% else %}<tr><td colspan="4">No management actions recorded yet.</td></tr>{% endfor %}</tbody></table></div>
+</div>
+</details>
+</section>
+<footer>FaceID Dashboard <span>Shared local workspace · Back up data regularly.</span></footer>
+</main>
+</div>
+<script>
+document.querySelectorAll('.management-card').forEach(card => {
+  card.addEventListener('toggle', () => {
+    if (card.open) {
+      document.querySelectorAll('.management-card').forEach(other => {
+        if (other !== card) other.open = false;
+      });
+    }
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Research Demo • FaceID</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .wrap { max-width: 1200px; }
+        .subnav {
+            display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;
+        }
+        .subnav a {
+            padding:9px 12px; border:1px solid #2b3a55;
+            border-radius:8px; color:#b9c7dc;
+            text-decoration:none; font-size:12px;
+        }
+        .subnav a.active { background:#1a2947; color:white; }
+        .panelx, .metric {
+            background:#111a2d; border:1px solid #24314a;
+            border-radius:13px; padding:20px; margin-bottom:16px;
+        }
+        .metrics {
+            display:grid; grid-template-columns:repeat(3,1fr);
+            gap:14px; margin-bottom:18px;
+        }
+        .metric span {
+            font-size:10px; color:#9aa9c0; letter-spacing:1px;
+        }
+        .metric strong {
+            display:block; font-size:27px; margin-top:9px;
+        }
+        .photo-grid {
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:16px;
+        }
+        .photo-card {
+            background:#111a2d; border:1px solid #24314a;
+            border-radius:13px; padding:15px; min-width:0;
+        }
+        .photo-card img {
+            width:100%; height:230px; object-fit:contain;
+            background:#0b1220; border-radius:9px;
+        }
+        .photo-card p {
+            font-size:12px; color:#b9c7dc;
+            margin:11px 0; overflow-wrap:anywhere;
+        }
+        .status {
+            display:inline-block; padding:6px 10px;
+            border-radius:6px; font-size:11px; font-weight:700;
+        }
+        .recognized {
+            color:#65d6ad; background:#15352f;
+        }
+        .unknown {
+            color:#ff9ba9; background:#3a202a;
+        }
+        .hint {
+            color:#9aa9c0; font-size:12px; line-height:1.7;
+        }
+        @media(max-width:850px) {
+            .photo-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        }
+        @media(max-width:550px) {
+            .photo-grid, .metrics { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">F</div>
+            <div><b>FaceID</b><small>RECOGNITION SYSTEM</small></div>
+        </div>
+        <div class="nav-label">WORKSPACE</div>
+        <a class="nav" href="/"><span>▦</span> Overview</a>
+        <a class="nav" href="/#live"><span>◉</span> Live recognition</a>
+        <a class="nav" href="/image_recognition"><span>▧</span> Image recognition</a>
+        <a class="nav" href="/persons"><span>♙</span> Registered persons</a>
+        <a class="nav" href="/history"><span>◷</span> Recognition history</a>
+        <a class="nav" href="/analytics"><span>▥</span> Analytics</a>
+        <a class="nav" href="/evaluation"><span>◫</span> Model evaluation</a>
+        <a class="nav" href="/lfw-evaluation"><span>◫</span> LFW Evaluation</a>
+        <a class="nav active" href="/lfw-demo"><span>▣</span> Research Demo</a>
+        <a class="nav" href="/system-management"><span>⚙</span> System Management</a>
+
+        <div class="side-note">
+            <div class="pulse"></div>
+            <div>
+                <b>Local processing</b>
+                <small>All recognition tools are available from this menu.</small>
+            </div>
+        </div>
+        <div class="side-bottom">
+            FACE RECOGNITION<br>
+            <span>Local dashboard · v5.0</span>
+        </div>
+    </aside>
+
+    <main class="main wrap">
+        <header class="topbar">
+            <div>
+                <div class="eyebrow">RESEARCH / LFW DATASET</div>
+                <h1>Face recognition demo</h1>
+                <p>Visual demonstration using the Labeled Faces in the Wild dataset.</p>
+            </div>
+            <div class="top-pill"><i></i> LOCAL SYSTEM</div>
+        </header>
+
+        <nav class="subnav">
+            <a href="/">Overview</a>
+            <a href="/evaluation">Model evaluation</a>
+            <a href="/lfw-evaluation">LFW Evaluation</a>
+            <a class="active" href="/lfw-demo">Research Demo</a>
+        </nav>
+
+        <section class="panelx">
+            <h2 style="margin-top:0">LFW recognition results</h2>
+            <p class="hint">
+                These are held-out test photographs compared against a
+                separate LFW gallery. The matching threshold is
+                {{ tolerance }}. This demonstration does not use the
+                website's registered-person database.
+            </p>
+        </section>
+
+        <section class="metrics">
+            <div class="metric">
+                <span>TEST PHOTOGRAPHS</span>
+                <strong>{{ results|length }}</strong>
+            </div>
+            <div class="metric">
+                <span>CORRECT IDENTITY MATCHES</span>
+                <strong>{{ correct_count }}</strong>
+            </div>
+            <div class="metric">
+                <span>UNKNOWN RESULTS</span>
+                <strong>{{ unknown_count }}</strong>
+            </div>
+        </section>
+
+        <div class="photo-grid">
+            {% for item in results %}
+            <article class="photo-card">
+                <img src="data:image/jpeg;base64,{{ item.image }}"
+                     alt="LFW test photograph">
+
+                <p><b>Actual identity:</b> {{ item.actual }}</p>
+                <p><b>Predicted identity:</b> {{ item.predicted }}</p>
+                <p><b>Matching distance:</b> {{ item.distance }}</p>
+
+                <p>
+                    <span class="status {{ 'recognized' if item.status == 'Recognized' else 'unknown' }}">
+                        {{ item.status }}
+                    </span>
+                </p>
+
+                <p><b>Identity result:</b>
+                    {% if item.correct %}
+                        Correct match
+                    {% elif item.status == 'Unknown' %}
+                        Rejected as unknown
+                    {% else %}
+                        Incorrect identity
+                    {% endif %}
+                </p>
+            </article>
+            {% endfor %}
+        </div>
+
+        <footer>
+            FaceID Dashboard
+            <span>Research demonstration using LFW test images</span>
+        </footer>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,376 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Image Recognition • FaceID</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .image-wrap { max-width:1200px; }
+
+        .image-panel {
+            background:#111a2d;
+            border:1px solid #24314a;
+            border-radius:14px;
+            padding:22px;
+            margin-bottom:18px;
+        }
+
+        .image-wrap .sub {
+            color:#94a3b8;
+            margin:0 0 22px;
+        }
+
+        .image-wrap input[type=file],
+        .image-wrap select {
+            background:#0b1120;
+            color:#dce5f6;
+            border:1px solid #334155;
+            padding:12px;
+            border-radius:8px;
+            max-width:100%;
+        }
+
+        .image-wrap select {
+            display:block;
+            width:100%;
+            max-width:380px;
+            margin-bottom:18px;
+        }
+
+        .image-wrap label {
+            display:block;
+            color:#cbd5e1;
+            font-size:13px;
+            margin-bottom:9px;
+        }
+
+        .image-wrap button,
+        .image-wrap .btn {
+            background:#617cff;
+            color:white;
+            border:0;
+            padding:11px 16px;
+            border-radius:8px;
+            cursor:pointer;
+            text-decoration:none;
+            display:inline-block;
+            font-size:13px;
+        }
+
+        .image-wrap button:hover,
+        .image-wrap .btn:hover {
+            background:#5069e8;
+        }
+
+        .image-wrap img {
+            max-width:100%;
+            border-radius:10px;
+        }
+
+        .image-wrap .annotated-preview {
+            display:block;
+            width:auto;
+            max-width:min(100%,760px);
+            max-height:520px;
+            height:auto;
+            object-fit:contain;
+            margin:0 auto;
+            background:#0b1120;
+        }
+
+        .image-wrap .stats {
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:12px;
+        }
+
+        .image-wrap .stat {
+            background:#0b1120;
+            border:1px solid #263650;
+            border-radius:10px;
+            padding:17px;
+        }
+
+        .image-wrap .stat strong {
+            display:block;
+            font-size:27px;
+            margin-bottom:5px;
+        }
+
+        .image-wrap .green { color:#34d399; }
+        .image-wrap .orange { color:#fbbf24; }
+
+        .image-wrap table {
+            width:100%;
+            border-collapse:collapse;
+            margin-top:15px;
+        }
+
+        .image-wrap th,
+        .image-wrap td {
+            text-align:left;
+            padding:13px;
+            border-bottom:1px solid #263650;
+            font-size:13px;
+        }
+
+        .image-wrap th { color:#94a3b8; }
+        .image-wrap .unknown { color:#fbbf24; }
+        .image-wrap .recognized { color:#34d399; }
+
+        .image-wrap .actions {
+            display:flex;
+            gap:12px;
+            flex-wrap:wrap;
+            margin-top:20px;
+        }
+
+        .image-wrap .error {
+            color:#fca5a5;
+            margin-top:12px;
+            background:#3a202a;
+            padding:12px;
+            border-radius:8px;
+        }
+
+        .mode-note {
+            color:#94a3b8;
+            font-size:12px;
+            line-height:1.7;
+            margin-top:8px;
+            max-width:650px;
+        }
+
+        .section-heading {
+            margin-top:0;
+            margin-bottom:16px;
+        }
+
+        .mode-tag {
+            display:inline-block;
+            background:#1a2947;
+            color:#93c5fd;
+            border:1px solid #36517b;
+            padding:6px 10px;
+            border-radius:7px;
+            font-size:11px;
+            margin-bottom:14px;
+        }
+
+        @media(max-width:650px) {
+            .image-wrap .stats { grid-template-columns:1fr; }
+            .image-wrap table { display:block; overflow-x:auto; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="shell">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">F</div>
+            <div>
+                <b>FaceID</b>
+                <small>RECOGNITION SYSTEM</small>
+            </div>
+        </div>
+
+        <div class="nav-label">WORKSPACE</div>
+
+        <a class="nav" href="/"><span>▦</span> Overview</a>
+        <a class="nav" href="/#live"><span>◉</span> Live recognition</a>
+        <a class="nav active" href="/image_recognition"><span>▧</span> Image recognition</a>
+        <a class="nav" href="/persons"><span>♙</span> Registered persons</a>
+        <a class="nav" href="/history"><span>◷</span> Recognition history</a>
+        <a class="nav" href="/analytics"><span>▥</span> Analytics</a>
+        <a class="nav" href="/evaluation"><span>◫</span> Model evaluation</a>
+        <a class="nav" href="/lfw-evaluation"><span>◫</span> LFW Evaluation</a>
+        <a class="nav" href="/lfw-demo"><span>▣</span> Research Demo</a>
+        <a class="nav" href="/system-management"><span>⚙</span> System Management</a>
+
+        <div class="side-note">
+            <div class="pulse"></div>
+            <div>
+                <b>Local processing</b>
+                <small>Uploaded photographs are processed locally on this computer.</small>
+            </div>
+        </div>
+
+        <div class="side-bottom">
+            FACE RECOGNITION<br>
+            <span>Local dashboard · v5.0</span>
+        </div>
+    </aside>
+
+    <main class="main image-wrap">
+
+        <header class="topbar">
+            <div>
+                <div class="eyebrow">WORKSPACE / IMAGE</div>
+                <h1>Image Recognition</h1>
+                <p class="sub">
+                    Upload a photograph to detect and identify faces.
+                </p>
+            </div>
+            <div class="top-pill"><i></i> LOCAL SYSTEM</div>
+        </header>
+
+        <div class="image-panel">
+            <h2 class="section-heading">Upload Photograph</h2>
+
+            <form method="POST" enctype="multipart/form-data">
+
+                <label for="recognition_source">Recognition Source</label>
+
+                <select name="recognition_source" id="recognition_source">
+                    <option value="registered"
+                        {% if recognition_source == 'registered' %}selected{% endif %}>
+                        Registered Persons
+                    </option>
+
+                    <option value="lfw"
+                        {% if recognition_source == 'lfw' %}selected{% endif %}>
+                        LFW Dataset (Gallery)
+                    </option>
+                </select>
+
+                <p class="mode-note">
+                    Registered Persons compares faces against your website's
+                    registered database. LFW Dataset compares faces against
+                    the separate LFW research gallery.
+                </p>
+
+                <label for="photo" style="margin-top:20px">
+                    Choose photograph
+                </label>
+
+                <input
+                    type="file"
+                    name="photo"
+                    id="photo"
+                    accept=".jpg,.jpeg,.png,.webp"
+                    required
+                >
+
+                <div style="margin-top:18px">
+                    <button type="submit">Analyse Photograph</button>
+                </div>
+            </form>
+
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+        </div>
+
+        {% if annotated_image %}
+
+        <div class="image-panel">
+            <span class="mode-tag">
+                {% if recognition_source == 'lfw' %}
+                    LFW RESEARCH RECOGNITION
+                {% else %}
+                    REGISTERED PERSON RECOGNITION
+                {% endif %}
+            </span>
+
+            <h2 class="section-heading">Analysis Summary</h2>
+
+            <div class="stats">
+                <div class="stat">
+                    <strong>{{ total }}</strong>
+                    Total Faces
+                </div>
+
+                <div class="stat">
+                    <strong class="green">{{ recognized }}</strong>
+                    Recognized
+                </div>
+
+                <div class="stat">
+                    <strong class="orange">{{ unknown }}</strong>
+                    Unknown
+                </div>
+            </div>
+        </div>
+
+        <div class="image-panel">
+            <h2 class="section-heading">Annotated Photograph</h2>
+
+            <img
+                class="annotated-preview"
+                src="{{ annotated_image }}"
+                alt="Analysed photograph with face recognition results"
+            >
+        </div>
+
+        <div class="image-panel">
+            <h2 class="section-heading">Face Recognition Results</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Face</th>
+                        <th>Person</th>
+                        <th>Status</th>
+                        <th>Distance</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in results %}
+                    <tr>
+                        <td>{{ item.face }}</td>
+
+                        <td>{{ item.name }}</td>
+
+                        <td class="{{ 'recognized' if item.status == 'Recognized' else 'unknown' }}">
+                            {{ item.status }}
+                        </td>
+
+                        <td>
+                            {{ item.distance if item.distance is not none else 'N/A' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if recognition_source == 'registered' %}
+            <div class="actions">
+                <a class="btn" href="{{ url_for('export_group_pdf') }}" download>
+                    Download PDF
+                </a>
+
+                <a class="btn" href="{{ url_for('export_group_excel') }}" download>
+                    Download Excel
+                </a>
+
+                <a class="btn" href="{{ url_for('export_group_report') }}" download>
+                    Download CSV
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        {% endif %}
+
+        <footer>
+            FaceID Dashboard
+            <span>
+                {% if recognition_source == 'lfw' %}
+                    Recognition using the separate LFW research gallery.
+                {% else %}
+                    Recognition using registered face encodings.
+                {% endif %}
+            </span>
+        </footer>
+
+    </main>
+</div>
+</body>
+</html>

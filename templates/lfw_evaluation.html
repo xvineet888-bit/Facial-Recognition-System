@@ -1,0 +1,246 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LFW Evaluation • FaceID</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .wrap { max-width: 1200px; }
+        .subnav {
+            display:flex; gap:8px; flex-wrap:wrap;
+            margin-bottom:20px;
+        }
+        .subnav a {
+            padding:9px 12px; border:1px solid #2b3a55;
+            border-radius:8px; color:#b9c7dc;
+            text-decoration:none; font-size:12px;
+        }
+        .subnav a.active { background:#1a2947; color:white; }
+        .panelx, .metric {
+            background:#111a2d; border:1px solid #24314a;
+            border-radius:13px; padding:20px;
+        }
+        .intro { margin-bottom:18px; }
+        .section-title { margin:24px 0 13px; }
+        .metrics {
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:14px;
+        }
+        .metric span {
+            display:block; font-size:10px;
+            color:#9aa9c0; letter-spacing:1px;
+        }
+        .metric strong {
+            display:block; font-size:27px;
+            margin-top:10px; color:#fff;
+        }
+        .metric small {
+            display:block; color:#9aa9c0;
+            font-size:11px; margin-top:7px;
+        }
+        .details {
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:12px;
+        }
+        .detail {
+            display:flex; justify-content:space-between;
+            gap:15px; padding:14px 16px;
+            background:#111a2d; border:1px solid #24314a;
+            border-radius:9px; font-size:12px;
+        }
+        .detail span { color:#9aa9c0; }
+        .detail strong { color:#e6edf8; text-align:right; }
+        .highlight { border-color:#36517b; }
+        .hint {
+            color:#9aa9c0; font-size:12px; line-height:1.8;
+        }
+        .accuracy-bar {
+            height:9px; background:#26334a;
+            border-radius:20px; overflow:hidden; margin-top:15px;
+        }
+        .accuracy-fill {
+            height:100%; background:#65b6f5;
+            border-radius:20px;
+        }
+        @media(max-width:850px) {
+            .metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        }
+        @media(max-width:550px) {
+            .metrics, .details { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">F</div>
+            <div><b>FaceID</b><small>RECOGNITION SYSTEM</small></div>
+        </div>
+
+        <div class="nav-label">WORKSPACE</div>
+        <a class="nav" href="/"><span>▦</span> Overview</a>
+        <a class="nav" href="/#live"><span>◉</span> Live recognition</a>
+        <a class="nav" href="/image_recognition"><span>▧</span> Image recognition</a>
+        <a class="nav" href="/persons"><span>♙</span> Registered persons</a>
+        <a class="nav" href="/history"><span>◷</span> Recognition history</a>
+        <a class="nav" href="/analytics"><span>▥</span> Analytics</a>
+        <a class="nav" href="/evaluation"><span>◫</span> Model evaluation</a>
+        <a class="nav active" href="/lfw-evaluation"><span>◫</span> LFW Evaluation</a>
+        <a class="nav" href="/lfw-demo"><span>▣</span> Research Demo</a>
+        <a class="nav" href="/system-management"><span>⚙</span> System Management</a>
+
+        <div class="side-note">
+            <div class="pulse"></div>
+            <div>
+                <b>Local processing</b>
+                <small>Research evaluation using the LFW dataset.</small>
+            </div>
+        </div>
+        <div class="side-bottom">
+            FACE RECOGNITION<br>
+            <span>Local dashboard · v5.0</span>
+        </div>
+    </aside>
+
+    <main class="main wrap">
+        <header class="topbar">
+            <div>
+                <div class="eyebrow">RESEARCH / PERFORMANCE ANALYSIS</div>
+                <h1>LFW Model Evaluation</h1>
+                <p>Quantitative evaluation on unseen LFW test photographs.</p>
+            </div>
+            <div class="top-pill"><i></i> LOCAL SYSTEM</div>
+        </header>
+
+        <nav class="subnav">
+            <a href="/">Overview</a>
+            <a href="/evaluation">Model evaluation</a>
+            <a class="active" href="/lfw-evaluation">LFW Evaluation</a>
+            <a href="/lfw-demo">Research Demo</a>
+        </nav>
+
+        <section class="panelx intro">
+            <h2 style="margin-top:0">Evaluation methodology</h2>
+            <p class="hint">
+                The Labeled Faces in the Wild (LFW) dataset is divided
+                into a gallery and a separate test set. Each test face
+                is compared with the gallery, and the closest identity
+                is accepted only when its distance is within the
+                configured threshold. This evaluation uses a separate
+                research dataset and does not modify registered users
+                in the website database.
+            </p>
+        </section>
+
+        <h2 class="section-title">Dataset overview</h2>
+        <section class="metrics">
+            <div class="metric">
+                <span>GALLERY IMAGES</span>
+                <strong>{{ gallery_count }}</strong>
+                <small>Reference identities</small>
+            </div>
+            <div class="metric">
+                <span>TEST IMAGES</span>
+                <strong>{{ total }}</strong>
+                <small>Unseen evaluation images</small>
+            </div>
+            <div class="metric">
+                <span>MATCHING THRESHOLD</span>
+                <strong>{{ tolerance }}</strong>
+                <small>Maximum accepted distance</small>
+            </div>
+        </section>
+
+        <section class="metrics" style="margin-top:14px">
+            <div class="metric">
+                <span>KNOWN-PERSON TESTS</span>
+                <strong>{{ known_total }}</strong>
+                <small>Identities present in gallery</small>
+            </div>
+            <div class="metric">
+                <span>UNKNOWN-PERSON TESTS</span>
+                <strong>{{ unknown_total }}</strong>
+                <small>Identities absent from gallery</small>
+            </div>
+            <div class="metric highlight">
+                <span>OVERALL EXACT-MATCH ACCURACY</span>
+                <strong>{{ accuracy }}%</strong>
+                <div class="accuracy-bar">
+                    <div class="accuracy-fill" style="width:{{ accuracy }}%"></div>
+                </div>
+            </div>
+        </section>
+
+        <h2 class="section-title">Recognition performance</h2>
+        <section class="metrics">
+            <div class="metric">
+                <span>KNOWN IDENTIFICATION ACCURACY</span>
+                <strong>{{ known_accuracy }}%</strong>
+                <small>Correct known identities / known test images</small>
+            </div>
+            <div class="metric">
+                <span>UNKNOWN REJECTION RATE</span>
+                <strong>{{ unknown_rejection }}%</strong>
+                <small>Unknown faces correctly rejected</small>
+            </div>
+            <div class="metric">
+                <span>FALSE ACCEPTANCE RATE</span>
+                <strong>{{ false_acceptance }}%</strong>
+                <small>Unknown faces incorrectly accepted</small>
+            </div>
+        </section>
+
+        <h2 class="section-title">Detailed evaluation results</h2>
+        <section class="details">
+            <div class="detail">
+                <span>Correct known identifications</span>
+                <strong>{{ correct_known }}</strong>
+            </div>
+            <div class="detail">
+                <span>Known-person rejections</span>
+                <strong>{{ known_rejected }}</strong>
+            </div>
+            <div class="detail">
+                <span>Known-person misidentifications</span>
+                <strong>{{ known_wrong }}</strong>
+            </div>
+            <div class="detail">
+                <span>Unknown-person correct rejections</span>
+                <strong>{{ unknown_rejected }}</strong>
+            </div>
+            <div class="detail">
+                <span>Unknown-person false acceptances</span>
+                <strong>{{ unknown_accepted }}</strong>
+            </div>
+            <div class="detail">
+                <span>Evaluation time</span>
+                <strong>{{ elapsed }} seconds</strong>
+            </div>
+        </section>
+
+        <section class="panelx" style="margin-top:18px">
+            <h3 style="margin-top:0">Interpretation</h3>
+            <p class="hint">
+                Known-person rejections occur when a genuine gallery
+                identity is not accepted. Misidentifications occur
+                when a test face is accepted but assigned to the wrong
+                gallery identity. False acceptances occur when an
+                identity absent from the gallery is incorrectly
+                matched to a gallery identity. These measures describe
+                different aspects of recognition performance.
+            </p>
+        </section>
+
+        <footer>
+            FaceID Dashboard
+            <span>Research evaluation using the LFW dataset</span>
+        </footer>
+    </main>
+</div>
+</body>
+</html>
